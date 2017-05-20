@@ -7,7 +7,7 @@ Created on Fri May 19 11:29:49 2017
 """
 from keras.layers import Conv1D
 from keras.layers import Dropout, Flatten, Dense
-from keras.layers import GlobalAveragePooling1D
+from keras.layers import GlobalAveragePooling1D, MaxPooling1D
 from keras.models import Sequential
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
@@ -73,7 +73,7 @@ plt.show()
 #
 
 #
-# Load example speaker data
+# Load example speaker data - need to normalize for training.
 #
 inputPath = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/mp3/'
 inputFile_train = 'english1.wav'
@@ -86,6 +86,9 @@ data_train, samplerate_train = sf.read(currFile)
 # validation data
 currFile = inputPath+inputFile_valid
 data_valid, samplerate_valid = sf.read(currFile)
+
+# normalize
+
 
 ##currFile2 = inputPath+inputFile2
 ##data2, samplerate2 = sf.read(currFile2)
@@ -111,7 +114,7 @@ plt.show()
 #
 # Two Categories:  US English Speaker vs. Outside US English Speaker
 # 
-data_len_max=500000 # set maximum input size to NN
+data_len_max=800000 # set maximum input size to NN
 train_audio = np.zeros([1,data_len_max,1])
 train_labels = np.zeros([1,1])
 #
@@ -160,16 +163,22 @@ audio_model = Sequential()
 #
 # Add the 1D convolution
 #
+# Max pool down to 256 (number of characters in snippet) x 512 phonemes
+#
+# Pool sum -> 1x512  (Sum across the entire field)
 #
 
-audio_model.add(Conv1D(128, kernel_size=4096, strides=10, activation='relu', input_shape=(data_len_max,1)))
+audio_model.add(Conv1D(128, kernel_size=4096, strides=1, activation='relu', input_shape=(data_len_max,1)))
 
+# Collapse down to number of characters (should be based on time of snippet)
+audio_model.add(MaxPooling1D(4096)) #100 time samples per letter
 # Include a two layer MLP for the classifier backend
 audio_model.add(Dense(512, activation='relu'))
 audio_model.add(Dropout(0.2))
 audio_model.add(Dense(512, activation='relu'))
 audio_model.add(Dropout(0.2))
 
+# Collapse down to 1,512
 audio_model.add(GlobalAveragePooling1D())
 # We want probabilities over the accent classes (2 for now)
 audio_model.add(Dense(2,activation='softmax'))
@@ -185,7 +194,7 @@ checkpointer = ModelCheckpoint(filepath='saved_models/weights.best.audio.hdf5',
 
 audio_model.fit(train_audio, train_labels_onehot, 
           validation_data=(valid_audio, valid_labels_onehot),
-          epochs=10, batch_size=1, callbacks=[checkpointer], verbose=1)
+          epochs=3, batch_size=1, callbacks=[checkpointer], verbose=1)
 
 #
 # Compute Test Accuracy
