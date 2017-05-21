@@ -19,68 +19,68 @@ import matplotlib.pyplot as plt
 #
 # Load some data
 #
-inputPath = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/wiki_IPA_examples/'
-inputFile = 'Postalveolar_approximant.ogg'
-inputFile2 = 'Voiced_labiodental_fricative.ogg'
+###inputPath = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/wiki_IPA_examples/'
+###inputFile = 'Postalveolar_approximant.ogg'
+###inputFile2 = 'Voiced_labiodental_fricative.ogg'
 
-currFile = inputPath+inputFile
-data, samplerate = sf.read(currFile)
+###currFile = inputPath+inputFile
+###data, samplerate = sf.read(currFile)
 
-currFile2 = inputPath+inputFile2
-data2, samplerate2 = sf.read(currFile2)
+###currFile2 = inputPath+inputFile2
+###data2, samplerate2 = sf.read(currFile2)
 
 ##rms = [np.sqrt(np.mean(block**2)) for block in
 ##       sf.blocks('myfile.wav', blocksize=1024, overlap=512)]
 
-print('samplerate = ', samplerate)
-print('data[0] = ', data[0])
-print('samplerate2 = ', samplerate2)
+###print('samplerate = ', samplerate)
+###print('data[0] = ', data[0])
+###print('samplerate2 = ', samplerate2)
 
 #
 # Extract a phoneme filter
 #
-postalV_approximant = data[63000:68000]
+###postalV_approximant = data[63000:68000]
 
 #
 # Plot the data
 #
 
-plt.plot(postalV_approximant)
-plt.show()
-plt.plot(data2[20000:25000])
-plt.show()
+###plt.plot(postalV_approximant)
+###plt.show()
+###plt.plot(data2[20000:25000])
+###plt.show()
 
 #
 # Compute a correlation between a filter and the full data set
 #
 
-sampleIndex = 0
-audCorrSum=np.zeros(len(data)-len(postalV_approximant))
-while sampleIndex+len(postalV_approximant) < len(data):
-    audCorr = np.multiply(data[sampleIndex:sampleIndex+len(postalV_approximant)],postalV_approximant)
-    audCorrSum[sampleIndex] = np.sum(audCorr)
-    sampleIndex = sampleIndex+1
+###sampleIndex = 0
+###audCorrSum=np.zeros(len(data)-len(postalV_approximant))
+###while sampleIndex+len(postalV_approximant) < len(data):
+###    audCorr = np.multiply(data[sampleIndex:sampleIndex+len(postalV_approximant)],postalV_approximant)
+###    audCorrSum[sampleIndex] = np.sum(audCorr)
+###    sampleIndex = sampleIndex+1
 
 
 #
 # Plot result
 #
-plt.plot(audCorrSum)
-plt.show()
+###plt.plot(audCorrSum)
+###plt.show()
 
 #
 # Pass list of phonemes to distribution calculator
 #
 
 #
-# Load example speaker data - need to normalize for training.
+# Load example speaker data - may need to normalize for training.
 #
 inputPath = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/mp3/'
 inputFile_train = 'english1.wav'
 inputFile_valid = 'english2.wav'
 ##inputFile2 = 'Voiced_labiodental_fricative.ogg'
 
-# train data
+# training data
 currFile = inputPath+inputFile_train
 data_train, samplerate_train = sf.read(currFile)
 # validation data
