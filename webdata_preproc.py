@@ -10,6 +10,7 @@ Script to preprocess the data for use with the NN.
 from lxml import html
 import requests
 import pickle
+import time
 
 #
 # Load the webpage with the accent examples
@@ -46,10 +47,9 @@ while m_index < len(maincontent_list):
 # of each speaker entry
 #
 speaker_attributes_details = []
-speaker_links_test = []
-speaker_links_test.append(speaker_links[0])
-speaker_links_test.append(speaker_links[1])
-for speaker_object in speaker_links_test:
+object_count = 0
+for speaker_object in speaker_links:
+    print('object count = ', object_count)
     # extract the current link from the href attribute
     curr_url = speaker_object.attrib['href']
     # extract the current tag, which matches to the soundfile, e.g. "english1"
@@ -94,6 +94,8 @@ for speaker_object in speaker_links_test:
     #
     speaker_bio_human_readable.append('speaker_soundfile:')
     speaker_bio_human_readable.append(sf_url)
+    object_count = object_count+1
+    time.sleep(0.2) # avoid overwhelming server
 
 #
 # Download the examples given their locations from the main webpage
