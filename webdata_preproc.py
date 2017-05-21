@@ -9,6 +9,7 @@ Script to preprocess the data for use with the NN.
 """
 from lxml import html
 import requests
+import pickle
 
 #
 # Load the webpage with the accent examples
@@ -109,6 +110,11 @@ for speaker_object in speaker_links_test:
 #
 # Pickle metadata files for later use by NN processing code.
 #
+
+pickleFile = outputDir+'speaker_attributes_details.out'
+pf = open(pickleFile,'wb')
+pickle.dump(speaker_attributes_details, pf)
+pf.close()
 
 #
 # End of script
