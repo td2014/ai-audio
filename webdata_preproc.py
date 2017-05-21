@@ -98,18 +98,6 @@ for speaker_object in speaker_links:
     time.sleep(0.2) # avoid overwhelming server
 
 #
-# Download the examples given their locations from the main webpage
-#
-
-#
-# Transform from mp3 to wav (easier to work with in Python)
-#
-
-#
-# Determine key audio parameters and add to information.
-#
-
-#
 # Pickle metadata files for later use by NN processing code.
 #
 
