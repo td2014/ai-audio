@@ -13,6 +13,8 @@ import requests
 #
 # Load the webpage with the accent examples
 #
+outputDir = ''
+#
 rootpage = 'http://accent.gmu.edu/'
 page = requests.get(rootpage+'browse_language.php?function=find&language=english')
 tree = html.fromstring(page.content)
@@ -50,20 +52,14 @@ speaker_links_test.append(speaker_links[0])
 speaker_links_test.append(speaker_links[1])
 for speaker_object in speaker_links_test:
     # extract the current link from the href attribute
-    print('in here.')
     curr_url = speaker_object.attrib['href']
     # extract the current tag, which matches to the soundfile, e.g. "english1"
     curr_tag = speaker_object.text
-    
-    print('curr_url = ', curr_url)
-    print('curr_tag = ', curr_tag)
-    print('curr_page = ', rootpage+curr_url)
     # form the full url path for the current speaker and load the page
     page = requests.get(rootpage+curr_url)
     tree = html.fromstring(page.content)
     # Extract biographical details
     speaker_bio = tree.xpath('//ul[@class="bio"]/node()')
-    
     #
     # Parse speaker_bio into human readable components
     #
@@ -81,7 +77,10 @@ for speaker_object in speaker_links_test:
             # Extract out the keyword value pairs for the speaker bio items
             if component.tag == 'li':  # list item
                 keyword = component.getchildren()[0].text
-                value = component.getchildren()[0].tail
+                if keyword == 'native language:': # need to drill down for tag
+                    value = component.getchildren()[1].attrib['href']
+                else:
+                    value = component.getchildren()[0].tail
                 speaker_bio_human_readable.append(keyword)
                 speaker_bio_human_readable.append(value)
         except: #ignore spacing characters
@@ -105,6 +104,9 @@ for speaker_object in speaker_links_test:
 # Determine key audio parameters and add to information.
 #
 
+#
+# Pickle metadata files for later use by NN processing code.
+#
 
 #
 # End of script
