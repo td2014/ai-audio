@@ -13,7 +13,7 @@ import requests
 #
 # Load the webpage with the accent examples
 #
-outputDir = ''
+outputDir = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/speaker_metadata/'
 #
 rootpage = 'http://accent.gmu.edu/'
 page = requests.get(rootpage+'browse_language.php?function=find&language=english')
@@ -35,7 +35,6 @@ while m_index < len(maincontent_list):
     speaker_attributes.append(maincontent_list[m_index])
     m_index = m_index+1
 
-
 #
 # The .attrib field contains the uri of the detail page
 # The .text field contains the tag name, such as "english1" of the 
@@ -46,7 +45,6 @@ while m_index < len(maincontent_list):
 # of each speaker entry
 #
 speaker_attributes_details = []
-speaker_soundfiles = []
 speaker_links_test = []
 speaker_links_test.append(speaker_links[0])
 speaker_links_test.append(speaker_links[1])
@@ -90,7 +88,11 @@ for speaker_object in speaker_links_test:
     # Add soundfile link
     speaker_soundinfo = tree.xpath('//audio[@id="player"]/node()')
     sf_url = speaker_soundinfo[1].attrib['src']
-    speaker_soundfiles.append(sf_url)
+    #
+    # Add soundfile link
+    #
+    speaker_bio_human_readable.append('speaker_soundfile:')
+    speaker_bio_human_readable.append(sf_url)
 
 #
 # Download the examples given their locations from the main webpage
