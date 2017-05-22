@@ -8,7 +8,7 @@ prepare the audio data for use with the neural network.
 
 @author: anthonydaniell
 """
-
+import analysis_prep as ap
 #
 # Set up the environment
 #
@@ -26,30 +26,20 @@ speaker_attributes_CSV = 'speaker_attributes_details.csv'
 soundfile_Metadata = outputDir_WAV+'soundFileMetadata.out'
 #
 # Download the webpage information.
-#
-
-# function version not tested - for documentation purposes
-####res = webdata_preproc_fn(outputDir_SpeakerMetadata, speaker_attributes_pickle)
-
+# using webdata_preproc.py script.
 #
 # Produce reformatted version for human readability
 #
 
-# function version not tested - for documentation purposes
-###res = analysis_prep(outputDir_SpeakerMetadata, speaker_attributes_pickle, outputDir_SpeakerMetadata, speaker_attributes_CSV)
+res = ap.analysis_prep(outputDir_SpeakerMetadata, speaker_attributes_pickle, outputDir_SpeakerMetadata, speaker_attributes_CSV)
 
 #
-# Download the soundfiles
-#
-
-# function version not tested - for documentation purposes
-###res = soundfile_download_fn(outputDir_SpeakerMetadata, speaker_attributes_pickle, outputDir_MP3)
-
+# Download the soundfiles using soundfile_download.py script.
 #
 # Preprocess and standardize the soundfiles
 #
 
-res = soundfile_preprocess(outputDir_MP3, outputDir_WAV, pathto_ffmpeg, soundfile_Metadata)
+####res = soundfile_preprocess(outputDir_MP3, outputDir_WAV, pathto_ffmpeg, soundfile_Metadata)
 
 #
 # End of script
