@@ -9,6 +9,7 @@ prepare the audio data for use with the neural network.
 @author: anthonydaniell
 """
 import analysis_prep as ap
+import soundfile_preprocess as sfp
 #
 # Set up the environment
 #
@@ -31,7 +32,7 @@ soundfile_Metadata = outputDir_WAV+'soundFileMetadata.out'
 # Produce reformatted version for human readability
 #
 
-res = ap.analysis_prep(outputDir_SpeakerMetadata, speaker_attributes_pickle, outputDir_SpeakerMetadata, speaker_attributes_CSV)
+###res = ap.analysis_prep(outputDir_SpeakerMetadata, speaker_attributes_pickle, outputDir_SpeakerMetadata, speaker_attributes_CSV)
 
 #
 # Download the soundfiles using soundfile_download.py script.
@@ -39,7 +40,7 @@ res = ap.analysis_prep(outputDir_SpeakerMetadata, speaker_attributes_pickle, out
 # Preprocess and standardize the soundfiles
 #
 
-####res = soundfile_preprocess(outputDir_MP3, outputDir_WAV, pathto_ffmpeg, soundfile_Metadata)
+res = sfp.soundfile_preprocess(outputDir_MP3, outputDir_WAV, pathto_ffmpeg, soundfile_Metadata)
 
 #
 # End of script

@@ -14,6 +14,7 @@ def soundfile_preprocess(inputDir, outputDir, pathto_ffmpeg, pickleFile):
     from os import listdir, system
     from os.path import isfile, join
     import soundfile as sf
+    import pickle
 
 #
 # Get list of files in input (only include mp3)
