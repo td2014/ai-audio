@@ -177,8 +177,9 @@ for currKey, currData in processDict.items():
 # Find minimum of each label to create balances train/test sets after filter            
 minCommon_goodSampleRate = min(len(process_USA),len(process_OTHER))
 
-trainNumber = int(0.6*minCommon_goodSampleRate)
-validNumber = int(0.1*minCommon_goodSampleRate)
+trainNumber = int(0.6*minCommon_goodSampleRate)+1  # 60% train
+validNumber = int(0.1*minCommon_goodSampleRate)+1  # 10% validation
+testNumber = minCommon_goodSampleRate-trainNumber-validNumber  #rest for testing
 
 #
 # Loop over both dictionaries to find max common number of samples
@@ -210,14 +211,74 @@ for iEntry, iVal in process_OTHER.items():
 #
 # Load up train, valid, test.  Pad to common size.
 #
-for iProcess in range(minCommon_goodSampleRate):
+data_train = np.zeros([2*trainNumber,1,max_len])
+label_train = np.zeros([2*trainNumber,1])
+
+data_valid = np.zeros([2*validNumber,1,max_len])
+label_valid = np.zeros([2*validNumber,1])
+
+data_test = np.zeros([2*testNumber,1,max_len])
+label_test = np.zeros([2*testNumber,1])
+
+iProcess=0
+trainCount=0
+validCount=0
+testCount=0
+# Load USA data
+for keyword_USA, value_USA in process_USA.items():
     
-    if iProcess <= trainNumber:
-        print('train:', iProcess)
-    elif iProcess <= trainNumber + validNumber:
-        print('valid:', iProcess)
+    for idx in range(len(value_USA)):
+        if value_USA[idx]=='filename:':
+            currFile=value_USA[idx+1]
+            
+    currFile_full = inputDir_WAV+currFile
+    thisdata, sr = sf.read(currFile_full)
+    pad_data = np.concatenate( (thisdata, np.zeros([max_len-len(thisdata)])))
+    if iProcess < trainNumber:
+        print('USA train:', iProcess, trainCount)
+        data_train[trainCount,0,:]= pad_data
+        trainCount=trainCount+1
+    elif iProcess < trainNumber + validNumber:
+        print('USAvalid:', iProcess, validCount)
+        data_valid[validCount,0,:]= pad_data
+        validCount=validCount+1
     else:
-        print('test:', iProcess)
+        print('USAtest:', iProcess, testCount)
+        data_test[testCount,0,:]=pad_data
+        testCount=testCount+1
+        
+    iProcess=iProcess+1
+    if iProcess==minCommon_goodSampleRate:
+        break
+    
+# Load other data
+iProcess=0
+for keyword_OTHER, value_OTHER in process_OTHER.items():
+    
+    for idx in range(len(value_OTHER)):
+        if value_OTHER[idx]=='filename:':
+            currFile=value_OTHER[idx+1]
+            
+    currFile_full = inputDir_WAV+currFile
+    thisdata, sr = sf.read(currFile_full)
+    pad_data = np.concatenate( (thisdata, np.zeros([max_len-len(thisdata)])))
+    if iProcess < trainNumber:
+        print('OTHER train:', iProcess, trainCount)
+        data_train[trainCount,0,:]= pad_data
+        trainCount=trainCount+1
+    elif iProcess < trainNumber + validNumber:
+        print('OTHERvalid:', iProcess, validCount)
+        data_valid[validCount,0,:]= pad_data
+        validCount=validCount+1
+    else:
+        print('OTHERtest:', iProcess, testCount)
+        data_test[testCount,0,:]= pad_data
+        testCount=testCount+1
+        
+    iProcess=iProcess+1
+    if iProcess==minCommon_goodSampleRate:
+        break
+    
 
 # training data
 ####currFile = inputPath+inputFile_train
