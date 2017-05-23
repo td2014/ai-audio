@@ -212,13 +212,13 @@ for iEntry, iVal in process_OTHER.items():
 # Load up train, valid, test.  Pad to common size.
 #
 data_train = np.zeros([2*trainNumber,1,max_len])
-label_train = np.zeros([2*trainNumber,1])
+label_train = np.zeros([2*trainNumber,2])
 
 data_valid = np.zeros([2*validNumber,1,max_len])
-label_valid = np.zeros([2*validNumber,1])
+label_valid = np.zeros([2*validNumber,2])
 
 data_test = np.zeros([2*testNumber,1,max_len])
-label_test = np.zeros([2*testNumber,1])
+label_test = np.zeros([2*testNumber,2])
 
 iProcess=0
 trainCount=0
@@ -237,14 +237,17 @@ for keyword_USA, value_USA in process_USA.items():
     if iProcess < trainNumber:
         print('USA train:', iProcess, trainCount)
         data_train[trainCount,0,:]= pad_data
+        label_train[trainCount,1] = 1
         trainCount=trainCount+1
     elif iProcess < trainNumber + validNumber:
         print('USAvalid:', iProcess, validCount)
         data_valid[validCount,0,:]= pad_data
+        label_valid[validCount,1] = 1
         validCount=validCount+1
     else:
         print('USAtest:', iProcess, testCount)
         data_test[testCount,0,:]=pad_data
+        label_test[testCount,1] = 1
         testCount=testCount+1
         
     iProcess=iProcess+1
@@ -265,14 +268,17 @@ for keyword_OTHER, value_OTHER in process_OTHER.items():
     if iProcess < trainNumber:
         print('OTHER train:', iProcess, trainCount)
         data_train[trainCount,0,:]= pad_data
+        label_train[trainCount,0] = 1
         trainCount=trainCount+1
     elif iProcess < trainNumber + validNumber:
         print('OTHERvalid:', iProcess, validCount)
         data_valid[validCount,0,:]= pad_data
+        label_valid[validCount,0] = 1
         validCount=validCount+1
     else:
         print('OTHERtest:', iProcess, testCount)
         data_test[testCount,0,:]= pad_data
+        label_test[testCount,0] = 1
         testCount=testCount+1
         
     iProcess=iProcess+1
@@ -280,13 +286,9 @@ for keyword_OTHER, value_OTHER in process_OTHER.items():
         break
     
 
-# training data
-####currFile = inputPath+inputFile_train
-####data_train, samplerate_train = sf.read(currFile)
-# validation data
-####currFile = inputPath+inputFile_valid
-####data_valid, samplerate_valid = sf.read(currFile)
-
+#
+# Create Pickle Files for convenience with NN code
+#
 
 #
 # Split data into train, validation, test sets
