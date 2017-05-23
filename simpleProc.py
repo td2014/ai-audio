@@ -180,6 +180,36 @@ minCommon_goodSampleRate = min(len(process_USA),len(process_OTHER))
 trainNumber = int(0.6*minCommon_goodSampleRate)
 validNumber = int(0.1*minCommon_goodSampleRate)
 
+#
+# Loop over both dictionaries to find max common number of samples
+#
+
+iCount=0
+max_len=-1
+for iEntry, iVal in process_USA.items():
+    for idx in range(len(iVal)):
+        if iVal[idx]=='data_length:':
+            if iVal[idx+1]>max_len:
+                max_len=iVal[idx+1]
+    
+    iCount=iCount+1
+    if iCount==minCommon_goodSampleRate:
+        break
+
+iCount=0
+for iEntry, iVal in process_OTHER.items():
+    for idx in range(len(iVal)):
+        if iVal[idx]=='data_length:':
+            if iVal[idx+1]>max_len:
+                max_len=iVal[idx+1]
+
+    iCount=iCount+1
+    if iCount==minCommon_goodSampleRate:
+        break            
+            
+#
+# Load up train, valid, test.  Pad to common size.
+#
 for iProcess in range(minCommon_goodSampleRate):
     
     if iProcess <= trainNumber:
