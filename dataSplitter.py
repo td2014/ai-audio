@@ -17,7 +17,12 @@ data = pickle.load(pf)
 pf.close()
 
 #
-# Loop over data and split based on critera.
+# Loop over data and split based on criteria:
+# 1) If speaker was born is usa, lives only in usa, and age is same as
+# years of residency, assign to USA class.
+# 2) If speaker age=residency age (but not USA_Born and USA_Live) assign
+# to OTHER class.
+# 3) Otherwise assign to IGNORE class (Will no be processed further).
 #
 USA_Count=0
 OTHER_Count=0
