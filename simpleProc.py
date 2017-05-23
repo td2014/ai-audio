@@ -29,6 +29,19 @@ inputDir_WAV = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoD
 speaker_attributes_split_pickle = 'speaker_attributes_details_split.out'
 soundfile_metadata_pickle = 'soundFileMetadata.out'
 
+outputDir_pickle_files='/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/pickle_files/'
+
+data_train_pickle=outputDir_pickle_files+'data_train_pickle.out'
+label_train_pickle=outputDir_pickle_files+'label_train_pickle.out'
+file_train_pickle=outputDir_pickle_files+'file_train_pickle.out'
+
+data_valid_pickle=outputDir_pickle_files+'data_valid_pickle.out'
+label_valid_pickle=outputDir_pickle_files+'label_valid_pickle.out'
+file_valid_pickle=outputDir_pickle_files+'file_valid_pickle.out'
+
+data_test_pickle=outputDir_pickle_files+'data_test_pickle.out'
+label_test_pickle=outputDir_pickle_files+'label_test_pickle.out'
+file_test_pickle=outputDir_pickle_files+'file_test_pickle.out'
 #
 # Load metadata with class tags appended
 #
@@ -213,12 +226,15 @@ for iEntry, iVal in process_OTHER.items():
 #
 data_train = np.zeros([2*trainNumber,1,max_len])
 label_train = np.zeros([2*trainNumber,2])
+file_train = [] #filenames
 
 data_valid = np.zeros([2*validNumber,1,max_len])
 label_valid = np.zeros([2*validNumber,2])
+file_valid = [] #filenames
 
 data_test = np.zeros([2*testNumber,1,max_len])
 label_test = np.zeros([2*testNumber,2])
+file_test = [] #filenames
 
 iProcess=0
 trainCount=0
@@ -238,16 +254,19 @@ for keyword_USA, value_USA in process_USA.items():
         print('USA train:', iProcess, trainCount)
         data_train[trainCount,0,:]= pad_data
         label_train[trainCount,1] = 1
+        file_train.append(currFile)
         trainCount=trainCount+1
     elif iProcess < trainNumber + validNumber:
         print('USAvalid:', iProcess, validCount)
         data_valid[validCount,0,:]= pad_data
         label_valid[validCount,1] = 1
+        file_valid.append(currFile)
         validCount=validCount+1
     else:
         print('USAtest:', iProcess, testCount)
         data_test[testCount,0,:]=pad_data
         label_test[testCount,1] = 1
+        file_test.append(currFile)
         testCount=testCount+1
         
     iProcess=iProcess+1
@@ -269,16 +288,19 @@ for keyword_OTHER, value_OTHER in process_OTHER.items():
         print('OTHER train:', iProcess, trainCount)
         data_train[trainCount,0,:]= pad_data
         label_train[trainCount,0] = 1
+        file_train.append(currFile)
         trainCount=trainCount+1
     elif iProcess < trainNumber + validNumber:
         print('OTHERvalid:', iProcess, validCount)
         data_valid[validCount,0,:]= pad_data
         label_valid[validCount,0] = 1
+        file_valid.append(currFile)
         validCount=validCount+1
     else:
         print('OTHERtest:', iProcess, testCount)
         data_test[testCount,0,:]= pad_data
         label_test[testCount,0] = 1
+        file_test.append(currFile)
         testCount=testCount+1
         
     iProcess=iProcess+1
@@ -289,6 +311,45 @@ for keyword_OTHER, value_OTHER in process_OTHER.items():
 #
 # Create Pickle Files for convenience with NN code
 #
+
+pf=open(data_train_pickle, 'wb')
+np.save(pf, data_train)
+pf.close()
+
+pf=open(label_train_pickle, 'wb')
+np.save(pf, label_train)
+pf.close()
+
+pf=open(file_train_pickle, 'wb')
+pickle.dump(file_train, pf)
+pf.close()
+
+###
+pf=open(data_valid_pickle, 'wb')
+np.save(pf, data_valid)
+pf.close()
+
+pf=open(label_valid_pickle, 'wb')
+np.save(pf, label_valid)
+pf.close()
+
+pf=open(file_valid_pickle, 'wb')
+pickle.dump(file_valid, pf)
+pf.close()
+
+###
+pf=open(data_test_pickle, 'wb')
+np.save(pf, data_test)
+pf.close()
+
+pf=open(label_test_pickle, 'wb')
+np.save(pf, label_test)
+pf.close()
+
+pf=open(file_test_pickle, 'wb')
+pickle.dump(file_test, pf)
+pf.close()
+
 
 #
 # Split data into train, validation, test sets
