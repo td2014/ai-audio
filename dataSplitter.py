@@ -11,6 +11,7 @@ import pickle
 
 inputDir_SpeakerMetadata = '/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/RawData/speaker_metadata/'
 speaker_attributes_pickle = 'speaker_attributes_details.out'
+speaker_attributes_split_pickle = 'speaker_attributes_details_split.out'
 
 pf = open(inputDir_SpeakerMetadata+speaker_attributes_pickle,'rb')
 data = pickle.load(pf)
@@ -58,6 +59,15 @@ for iRecord in data:
         IGNORE_Count = IGNORE_Count+1
         
     splitRecord.append(iRecord)
+    
+    
+#
+# Pickle metadata file with split/class tag appended
+#
+
+    pf = open(inputDir_SpeakerMetadata+speaker_attributes_split_pickle,'wb')
+    pickle.dump(splitRecord, pf)
+    pf.close()
 
 #
 # End of script
