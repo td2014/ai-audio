@@ -147,10 +147,47 @@ if global_max_data_val > 1.0:
 USA_count=0
 OTHER_count=0
 
-for dataIdx in range(len(speaker_attributes_split)):
-    print(speaker_attributes_split[dataIdx])
-    print(soundfile_metadata[dataIdx])
+process_USA = {}
+process_OTHER = {}
 
+for currKey, currData in processDict.items():
+    USA_tag = False
+    OTHER_tag = False
+    sample_rate_good = False
+    for iFieldIdx in range(len(currData)):
+        if currData[iFieldIdx]=='class_tag:':
+            if currData[iFieldIdx+1]=='USA':
+                USA_tag = True
+            elif currData[iFieldIdx+1]=='OTHER':
+                OTHER_tag = True
+            else:
+                continue
+        if currData[iFieldIdx]=='sample_rate:':
+            if currData[iFieldIdx+1]==44100:
+                sample_rate_good=True
+
+# Map to split dictionaries by class
+    if USA_tag and sample_rate_good:
+        process_USA[currKey]=currData
+    elif OTHER_tag and sample_rate_good:
+        process_OTHER[currKey]=currData
+    else:
+        continue
+    
+# Find minimum of each label to create balances train/test sets after filter            
+minCommon_goodSampleRate = min(len(process_USA),len(process_OTHER))
+
+trainNumber = int(0.6*minCommon_goodSampleRate)
+validNumber = int(0.1*minCommon_goodSampleRate)
+
+for iProcess in range(minCommon_goodSampleRate):
+    
+    if iProcess <= trainNumber:
+        print('train:', iProcess)
+    elif iProcess <= trainNumber + validNumber:
+        print('valid:', iProcess)
+    else:
+        print('test:', iProcess)
 
 # training data
 ####currFile = inputPath+inputFile_train
