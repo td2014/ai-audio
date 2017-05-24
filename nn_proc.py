@@ -102,6 +102,7 @@ data_train_scramble = np.reshape(data_train[perm],(-1,data_len_max,1))
 label_train_scramble = label_train[perm]
 
 data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
+data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 
 #
 # The architecture should be
@@ -116,18 +117,19 @@ data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
 #
 audio_model = Sequential()
 
-audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
+###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
 
-#audio_model.add(Conv1D(128, kernel_size=4096, strides=50, activation='relu', input_shape=(data_len_max,1)))
-audio_model.add(Conv1D(256, kernel_size=128, strides=5, activation='relu'))
+audio_model.add(Conv1D(128, kernel_size=64, strides=50, activation='relu', input_shape=(data_len_max,1)))
+
+###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
 
 # Collapse down to number of characters (should be based on time of snippet)
 audio_model.add(MaxPooling1D(64)) #100 time samples per letter
 # Include a two layer multi-layer perceptron for the classifier backend
 audio_model.add(Dense(512, activation='relu'))
-###audio_model.add(Dropout(0.01))
+audio_model.add(Dropout(0.1))
 audio_model.add(Dense(512, activation='relu'))
-###audio_model.add(Dropout(0.01))
+audio_model.add(Dropout(0.1))
 
 # Collapse down to 1,512
 audio_model.add(GlobalAveragePooling1D())
@@ -140,7 +142,7 @@ audio_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metric
 #
 # Compute Cross-Validation Accuracy
 #
-checkpointer = ModelCheckpoint(filepath='saved_models/weights.best.audio.hdf5', 
+checkpointer = ModelCheckpoint(filepath='saved_models/weights.best_v2.audio.hdf5', 
                                verbose=1, save_best_only=True)
 
 audio_model.fit(data_train_scramble, label_train_scramble, 
@@ -150,15 +152,23 @@ audio_model.fit(data_train_scramble, label_train_scramble,
 #
 # Compute Test Accuracy
 #
-###audio_model.load_weights('saved_models/weights.best.audio.hdf5')
+audio_model.load_weights('saved_models/weights.best_v2.audio.hdf5')
 
 # get index of predicted dog breed for each image in test set
-###audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in test_audio]
+audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 
 # report test accuracy
-###test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(test_targets, axis=1))/len(audio_predictions)
-###print('Test accuracy: %.4f%%' % test_accuracy)
+test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
+print('Test accuracy: %.4f%%' % test_accuracy)
 
+#
+# Compute some diagnostics
+#
+
+ma_test = np.zeros([data_len_max])
+
+for idx in range(data_len_max-20):
+    ma_test[idx]=np.mean(data_test[97,0,idx:idx+20])
 
 #
 # End of script
