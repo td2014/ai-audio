@@ -95,8 +95,10 @@ np.random.seed(42)
 #
 
 perm = np.random.permutation(len(data_train))
-data_train_scramble = data_train[perm]
+data_train_scramble = np.reshape(data_train[perm],(-1,data_len_max,1))
 label_train_scramble = label_train[perm]
+
+data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
 
 #
 # The architecture should be
@@ -111,7 +113,7 @@ label_train_scramble = label_train[perm]
 #
 audio_model = Sequential()
 
-audio_model.add(Conv1D(512, kernel_size=4096, strides=1, activation='relu', input_shape=(data_len_max,1)))
+audio_model.add(Conv1D(128, kernel_size=4096, strides=10, activation='relu', input_shape=(data_len_max,1)))
 
 # Collapse down to number of characters (should be based on time of snippet)
 audio_model.add(MaxPooling1D(4096)) #100 time samples per letter
@@ -136,7 +138,7 @@ checkpointer = ModelCheckpoint(filepath='saved_models/weights.best.audio.hdf5',
                                verbose=1, save_best_only=True)
 
 audio_model.fit(data_train_scramble, label_train_scramble, 
-          validation_data=(data_valid, label_valid),
+          validation_data=(data_valid_reshape, label_valid),
           epochs=1, batch_size=1, callbacks=[checkpointer], verbose=1)
 
 #
