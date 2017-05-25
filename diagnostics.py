@@ -15,6 +15,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 from keras.models import load_model
 import numpy as np
+import scipy.signal as sig
 import io
 import soundfile as sf
 import matplotlib.pyplot as plt
@@ -117,11 +118,11 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 audio_model = load_model('saved_models/config_audio_v5_named.hdf5')
 
 # get index of predicted accent for each image in test set
-###audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
+audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 
 # report test accuracy
-###test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
-###print('Test accuracy: %.4f%%' % test_accuracy)
+test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
+print('Test accuracy: %.4f%%' % test_accuracy)
 
 #
 # Compute some diagnostics
@@ -156,8 +157,9 @@ model_prediction = model.predict(data_train_scramble)
 #
 #
 ##img_idx=9
-plt.imshow(np.rot90(model_prediction[0,:,:],1),cmap='hot')
-plt.plot(data_train_scramble[0,:,:])
+#plt.imshow(np.rot90(model_prediction[0,:,:],1),cmap='hot')
+#plt.plot(data_train_scramble[0,:,:])
+#dsamp = sig.decimate(data_train_scramble[0,:100000,:],10)
 ###diag_weights = audio_model.get_weights(by_name=True)
 #diag_config = audio_model.get_config()[0]['config']
 ###config_name= diag_config['name']
