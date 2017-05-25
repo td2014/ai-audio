@@ -13,6 +13,7 @@ from keras.layers import GlobalAveragePooling1D, MaxPooling1D, AveragePooling1D
 from keras.models import Sequential
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
+from keras.models import load_model
 import numpy as np
 import io
 import soundfile as sf
@@ -111,25 +112,74 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 # Load weights file and recreate earlier processing stages
 # Overlay with data timeseries.
 #
-audio_model = Sequential()
-audio_model.load_weights('saved_models/weights.best_v3.audio.hdf5')
+####audio_model = Sequential()
+###audio_model.add(Conv1D(128, kernel_size=128, strides=32, activation='relu', input_shape=(data_len_max,1)))
+# Collapse down to number of characters (should be based on time of snippet)
+###audio_model.add(MaxPooling1D(64)) #100 time samples per letter
+# Include a two layer multi-layer perceptron for the classifier backend
+###audio_model.add(Dense(512, activation='relu'))
+###audio_model.add(Dropout(0.1))
+###audio_model.add(Dense(512, activation='relu'))
+###audio_model.add(Dropout(0.1))
+# Collapse down to 1,512
+###audio_model.add(GlobalAveragePooling1D())
+# We want probabilities over the accent classes (2 for now)
+###audio_model.add(Dense(2,activation='softmax'))
 
-# get index of predicted dog breed for each image in test set
-audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
+# Output architecture and compile
+###audio_model.summary()
+###audio_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+# Load weights from previous training session
+audio_model = load_model('saved_models/config_audio_v4_named.hdf5')
+
+# get index of predicted accent for each image in test set
+###audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 
 # report test accuracy
-test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
-print('Test accuracy: %.4f%%' % test_accuracy)
+###test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
+###print('Test accuracy: %.4f%%' % test_accuracy)
 
 #
 # Compute some diagnostics
 #
 
-ma_test = np.zeros([data_len_max])
+#
+# Rebuild relevant sections of the model we are
+# interested in exploring.
+#
+# new model
+fname = 'saved_models/weights.best_audio_v4_named.hdf5'
+model = Sequential()
+model.add(audio_model.layers[0])  # will be loaded
+model.add(audio_model.layers[1])  # will be loaded
+model.summary()
+###model.load_weights(fname, by_name=True)
+model_prediction = model.predict(data_train_scramble)
 
-for idx in range(data_len_max-20):
-    ma_test[idx]=np.mean(data_test[97,0,idx:idx+20])
+#
+# Create an image which shows output after the maxpooling layer
+# superimposed with the audio waveform
+#
+# -----------------------------
+#
+#   Image
+#
+#
+#
+# -----------------------------
+#
+#  ~~~~~~waveform~~~~~~~~~~~~~~
+#
+#
+img_idx=9
+plt.imshow(np.rot90(model_prediction[img_idx,:,:],1),cmap='hot')
+plt.plot(data_train_scramble[img_idx,:,:])
+###diag_weights = audio_model.get_weights(by_name=True)
+#diag_config = audio_model.get_config()[0]['config']
+###config_name= diag_config['name']
 
+###conv1D_weights = audio_model.get_weights()[0]
 #
 # End of script
 #

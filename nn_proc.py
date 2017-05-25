@@ -41,6 +41,9 @@ data_test_pickle=outputDir_pickle_files+'data_test_pickle.out'
 label_test_pickle=outputDir_pickle_files+'label_test_pickle.out'
 file_test_pickle=outputDir_pickle_files+'file_test_pickle.out'
 
+savedmodel_path= \
+'/Users/anthonydaniell/Desktop/FilesToStay/OnlineCourses/AI_NanoDegree/Term2/CapstoneProject/CodeBase/ai_audio/saved_models/'
+
 #
 # Load pickle files
 #
@@ -115,26 +118,27 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
+model_name='audio_v5_named'
 audio_model = Sequential()
 
 ###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
 
-audio_model.add(Conv1D(128, kernel_size=128, strides=32, activation='relu', input_shape=(data_len_max,1)))
+audio_model.add(Conv1D(256, kernel_size=128, strides=32, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
 
 ###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
 
 # Collapse down to number of characters (should be based on time of snippet)
-audio_model.add(MaxPooling1D(64)) #100 time samples per letter
+audio_model.add(MaxPooling1D(64, name='maxpool_1')) #100 time samples per letter
 # Include a two layer multi-layer perceptron for the classifier backend
-audio_model.add(Dense(512, activation='relu'))
-audio_model.add(Dropout(0.1))
-audio_model.add(Dense(512, activation='relu'))
-audio_model.add(Dropout(0.1))
+audio_model.add(Dense(512, activation='relu', name='dense_1'))
+audio_model.add(Dropout(0.1, name='dropout_1'))
+audio_model.add(Dense(512, activation='relu', name='dense_2'))
+audio_model.add(Dropout(0.1, name='dropout_2'))
 
 # Collapse down to 1,512
-audio_model.add(GlobalAveragePooling1D())
+audio_model.add(GlobalAveragePooling1D(name='gap_1'))
 # We want probabilities over the accent classes (2 for now)
-audio_model.add(Dense(2,activation='softmax'))
+audio_model.add(Dense(2,activation='softmax', name='dense_3'))
 
 # Output architecture and compile
 audio_model.summary()
@@ -142,7 +146,8 @@ audio_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metric
 #
 # Compute Cross-Validation Accuracy
 #
-checkpointer = ModelCheckpoint(filepath='saved_models/weights.best_v3.audio.hdf5', 
+modelweights_filepath=savedmodel_path+'weights.best_'+model_name+'.hdf5'
+checkpointer = ModelCheckpoint(filepath=modelweights_filepath, 
                                verbose=1, save_best_only=True)
 
 audio_model.fit(data_train_scramble, label_train_scramble, 
@@ -150,9 +155,14 @@ audio_model.fit(data_train_scramble, label_train_scramble,
           epochs=50, batch_size=20, callbacks=[checkpointer], verbose=1)
 
 #
+# Save full_model
+#
+
+audio_model.save(savedmodel_path+'config_'+model_name+'.hdf5')
+#
 # Compute Test Accuracy
 #
-audio_model.load_weights('saved_models/weights.best_v3.audio.hdf5')
+audio_model.load_weights(modelweights_filepath)
 
 # get index of predicted accent for each image in test set
 audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
