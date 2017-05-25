@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue May 23 12:52:18 2017
+Created on Thu May 25 08:40:21 2017
 
-Create NN model and evaluate.
+Code to create some diagnotics of the learning process.
 
 @author: anthonydaniell
 """
-
 from keras.layers import Conv1D
 from keras.layers import Dropout, Flatten, Dense
 from keras.layers import GlobalAveragePooling1D, MaxPooling1D, AveragePooling1D
@@ -21,6 +20,10 @@ import matplotlib.pyplot as plt
 import pickle
 import sounddevice as sd
 
+#
+# Read in and preprocess data similar to what is done for the
+# nn training
+#
 
 #
 # Setup some directories and files
@@ -105,56 +108,13 @@ data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
 data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 
 #
-# The architecture should be
-#
-# 1:  num_sound_samples x 512 filters
-#
-# 2:  Add the 1D convolution
-#
-# 3:  Max pool down to 256 (number of characters in snippet) x 512 phonemes
-#
-# 4:  Pool sum -> 1x512  (Sum across the entire field)
+# Load weights file and recreate earlier processing stages
+# Overlay with data timeseries.
 #
 audio_model = Sequential()
-
-###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
-
-audio_model.add(Conv1D(128, kernel_size=128, strides=32, activation='relu', input_shape=(data_len_max,1)))
-
-###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
-
-# Collapse down to number of characters (should be based on time of snippet)
-audio_model.add(MaxPooling1D(64)) #100 time samples per letter
-# Include a two layer multi-layer perceptron for the classifier backend
-audio_model.add(Dense(512, activation='relu'))
-audio_model.add(Dropout(0.1))
-audio_model.add(Dense(512, activation='relu'))
-audio_model.add(Dropout(0.1))
-
-# Collapse down to 1,512
-audio_model.add(GlobalAveragePooling1D())
-# We want probabilities over the accent classes (2 for now)
-audio_model.add(Dense(2,activation='softmax'))
-
-# Output architecture and compile
-audio_model.summary()
-audio_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-#
-# Compute Cross-Validation Accuracy
-#
-checkpointer = ModelCheckpoint(filepath='saved_models/weights.best_v3.audio.hdf5', 
-                               verbose=1, save_best_only=True)
-
-audio_model.fit(data_train_scramble, label_train_scramble, 
-          validation_data=(data_valid_reshape, label_valid),
-          epochs=50, batch_size=20, callbacks=[checkpointer], verbose=1)
-
-#
-# Compute Test Accuracy
-#
 audio_model.load_weights('saved_models/weights.best_v3.audio.hdf5')
 
-# get index of predicted accent for each image in test set
+# get index of predicted dog breed for each image in test set
 audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 
 # report test accuracy
