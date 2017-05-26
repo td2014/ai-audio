@@ -121,12 +121,12 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
-model_name='audio_v10_named'
+model_name='audio_v11_named'
 audio_model = Sequential()
 
 ###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
 
-audio_model.add(Conv1D(1024, kernel_size=1024, strides=32, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
+audio_model.add(Conv1D(256, kernel_size=128, strides=32, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
 
 ###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
 
@@ -135,9 +135,9 @@ audio_model.add(Conv1D(1024, kernel_size=1024, strides=32, activation='relu', in
 audio_model.add(GlobalMaxPooling1D(name='maxpool_1')) #100 time samples per letter
 # Include a two layer multilayer perceptron for the classifier backend
 audio_model.add(Dense(256, activation='relu', name='dense_1'))
-audio_model.add(Dropout(0.1, name='dropout_1'))
-audio_model.add(Dense(256, activation='relu', name='dense_2'))
-audio_model.add(Dropout(0.1, name='dropout_2'))
+audio_model.add(Dropout(0.5, name='dropout_1'))
+##audio_model.add(Dense(256, activation='relu', name='dense_2'))
+##audio_model.add(Dropout(0.1, name='dropout_2'))
 
 # Collapse down to 1,512
 ###audio_model.add(GlobalAveragePooling1D(name='gap_1'))
