@@ -120,17 +120,18 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
-model_name='audio_v6_named'
+model_name='audio_v7_named'
 audio_model = Sequential()
 
 ###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
 
-audio_model.add(Conv1D(128, kernel_size=128, strides=4, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
+audio_model.add(Conv1D(256, kernel_size=128, strides=4, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
 
 ###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
 
 # Collapse down to number of characters (should be based on time of snippet)
-audio_model.add(MaxPooling1D(16, name='maxpool_1')) #100 time samples per letter
+###audio_model.add(MaxPooling1D(16, name='maxpool_1')) #100 time samples per letter
+audio_model.add(GlobalAveragePooling1D(name='maxpool_1')) #100 time samples per letter
 # Include a two layer multi-layer perceptron for the classifier backend
 audio_model.add(Dense(256, activation='relu', name='dense_1'))
 audio_model.add(Dropout(0.1, name='dropout_1'))
@@ -138,7 +139,7 @@ audio_model.add(Dense(256, activation='relu', name='dense_2'))
 audio_model.add(Dropout(0.1, name='dropout_2'))
 
 # Collapse down to 1,512
-audio_model.add(GlobalAveragePooling1D(name='gap_1'))
+###audio_model.add(GlobalAveragePooling1D(name='gap_1'))
 # We want probabilities over the accent classes (2 for now)
 audio_model.add(Dense(2,activation='softmax', name='dense_3'))
 
@@ -154,7 +155,7 @@ checkpointer = ModelCheckpoint(filepath=modelweights_filepath,
 
 audio_model.fit(data_train_scramble, label_train_scramble, 
           validation_data=(data_valid_reshape, label_valid),
-          epochs=10, batch_size=20, callbacks=[checkpointer], verbose=1)
+          epochs=50, batch_size=20, callbacks=[checkpointer], verbose=1)
 
 #
 # Save full_model
