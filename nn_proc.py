@@ -11,6 +11,7 @@ Create NN model and evaluate.
 from keras.layers import Conv1D
 from keras.layers import Dropout, Flatten, Dense
 from keras.layers import GlobalAveragePooling1D, MaxPooling1D, AveragePooling1D
+from keras.layers import GlobalMaxPooling1D
 from keras.models import Sequential
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
@@ -120,7 +121,7 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
-model_name='audio_v7_named'
+model_name='audio_v8_named'
 audio_model = Sequential()
 
 ###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
@@ -131,8 +132,8 @@ audio_model.add(Conv1D(256, kernel_size=128, strides=4, activation='relu', input
 
 # Collapse down to number of characters (should be based on time of snippet)
 ###audio_model.add(MaxPooling1D(16, name='maxpool_1')) #100 time samples per letter
-audio_model.add(GlobalAveragePooling1D(name='maxpool_1')) #100 time samples per letter
-# Include a two layer multi-layer perceptron for the classifier backend
+audio_model.add(GlobalMaxPooling1D(name='maxpool_1')) #100 time samples per letter
+# Include a two layer multilayer perceptron for the classifier backend
 audio_model.add(Dense(256, activation='relu', name='dense_1'))
 audio_model.add(Dropout(0.1, name='dropout_1'))
 audio_model.add(Dense(256, activation='relu', name='dense_2'))
