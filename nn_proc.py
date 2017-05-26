@@ -121,12 +121,12 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
-model_name='audio_v13_named'
+model_name='audio_v14_named'
 audio_model = Sequential()
 
 ###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
 
-audio_model.add(Conv1D(64, kernel_size=256, strides=16, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
+audio_model.add(Conv1D(64, kernel_size=512, strides=16, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
 
 ###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
 
