@@ -121,12 +121,12 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
-model_name='audio_v9_named'
+model_name='audio_v10_named'
 audio_model = Sequential()
 
 ###audio_model.add(AveragePooling1D(pool_size=20, strides=None, padding='valid',input_shape=(data_len_max,1)))
 
-audio_model.add(Conv1D(256, kernel_size=128, strides=4, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
+audio_model.add(Conv1D(1024, kernel_size=1024, strides=32, activation='relu', input_shape=(data_len_max,1), name='conv_1'))
 
 ###audio_model.add(Conv1D(128, kernel_size=128, strides=5, activation='relu'))
 
@@ -152,11 +152,11 @@ audio_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metric
 #
 modelweights_filepath=savedmodel_path+'weights.best_'+model_name+'.hdf5'
 checkpointer = ModelCheckpoint(filepath=modelweights_filepath, 
-                               verbose=1, save_best_only=False)
+                               verbose=1, save_best_only=True)
 
 audio_model.fit(data_train_scramble, label_train_scramble, 
           validation_data=(data_valid_reshape, label_valid),
-          epochs=50, batch_size=20, callbacks=[checkpointer], verbose=1)
+          epochs=10, batch_size=20, callbacks=[checkpointer], verbose=1)
 
 #
 # Save full_model

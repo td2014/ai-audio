@@ -117,7 +117,7 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 
 # Load weights from previous training session
-audio_model = load_model('saved_models/config_audio_v8_named.hdf5')
+audio_model = load_model('saved_models/config_audio_v9_named.hdf5')
 
 # get index of predicted accent for each image in test set
 audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
@@ -138,7 +138,7 @@ print('Test accuracy: %.4f%%' % test_accuracy)
 ###fname = 'saved_models/weights.best_audio_v4_named.hdf5'
 model = Sequential()
 model.add(audio_model.layers[0])  # will be loaded
-model.add(audio_model.layers[1])  # will be loaded
+###model.add(audio_model.layers[1])  # will be loaded
 model.summary()
 ###model.load_weights(fname, by_name=True)
 model_prediction = model.predict(data_train_scramble)
@@ -165,6 +165,27 @@ model_prediction = model.predict(data_train_scramble)
 ###diag_weights = audio_model.get_weights(by_name=True)
 #diag_config = audio_model.get_config()[0]['config']
 ###config_name= diag_config['name']
+
+fig, ax = plt.subplots()
+idx=1
+istart1=2600
+iend1=4000
+istart2=1000
+iend2=2000
+ax.plot(4000*data_train_scramble[0,istart1:iend1,:],alpha=1.0)
+ax.plot(4000*data_train_scramble[1,istart2:iend2,:],alpha=0.5)
+#ax.imshow(np.rot90(model_prediction[idx,istart:iend,:],1),cmap='hot',extent=[0, iend-istart, -2000, 2000],alpha=1.0)
+###fig.canvas.draw()
+
+##fig, ax = plt.subplots()
+##x = range(300)
+##ax.imshow(np.rot90(model_prediction[0,istart:iend,:],1),cmap='hot', extent=[0, 400, 0, 300])
+##ax.plot(x, x, '--', linewidth=5, color='firebrick')
+
+
+###for iCase in range(len(model_prediction)):
+###    if label_train_scramble[iCase,1] == 1:  #USA class
+###        plt.plot(model_prediction[iCase,:])
 
 ###conv1D_weights = audio_model.get_weights()[0]
 #
