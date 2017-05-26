@@ -10,6 +10,7 @@ Code to create some diagnotics of the learning process.
 from keras.layers import Conv1D
 from keras.layers import Dropout, Flatten, Dense
 from keras.layers import GlobalAveragePooling1D, MaxPooling1D, AveragePooling1D
+from keras.layers import GlobalMaxPooling1D
 from keras.models import Sequential
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
@@ -50,9 +51,10 @@ file_test_pickle=outputDir_pickle_files+'file_test_pickle.out'
 # Load pickle files
 #
 subset_len=1000000 # reduce full data fields
+downsample_factor=10
 pf=open(data_train_pickle, 'rb')
 data_train_full = np.load(pf)
-data_train = data_train_full[:,:,:subset_len]
+data_train = sig.decimate(data_train_full[:,:,:subset_len],downsample_factor,axis=2)
 pf.close()
 
 pf=open(label_train_pickle, 'rb')
@@ -66,7 +68,7 @@ pf.close()
 ###
 pf=open(data_valid_pickle, 'rb')
 data_valid_full = np.load(pf)
-data_valid = data_valid_full[:,:,:subset_len]
+data_valid = sig.decimate(data_valid_full[:,:,:subset_len],downsample_factor,axis=2)
 pf.close()
 
 pf=open(label_valid_pickle, 'rb')
@@ -80,7 +82,7 @@ pf.close()
 ###
 pf=open(data_test_pickle, 'rb')
 data_test_full = np.load(pf)
-data_test = data_test_full[:,:,:subset_len]
+data_test = sig.decimate(data_test_full[:,:,:subset_len],downsample_factor,axis=2)
 pf.close()
 
 pf=open(label_test_pickle, 'rb')
@@ -115,7 +117,7 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 
 # Load weights from previous training session
-audio_model = load_model('saved_models/config_audio_v5_named.hdf5')
+audio_model = load_model('saved_models/config_audio_v8_named.hdf5')
 
 # get index of predicted accent for each image in test set
 audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
