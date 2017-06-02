@@ -193,11 +193,11 @@ audio_model.fit(data_train_scramble, label_train_scramble,
 ###audio_model = load_model(savedmodel_path+'config_'+model_name+'.hdf5')
 
 # get index of predicted accent for each image in test set
-###audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
+audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 
 # report test accuracy
-###test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
-###print('Test accuracy: %.4f%%' % test_accuracy)
+test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
+print('Test accuracy: %.4f%%' % test_accuracy)
 
 #dump out weights
 print('audio_model.get_weights()[0][0] = ', audio_model.get_weights()[0][0])
