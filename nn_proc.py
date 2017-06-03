@@ -144,7 +144,14 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 # 4:  Pool sum -> 1x512  (Sum across the entire field)
 #
-model_name='audio_v18_named'
+try:
+    audio_model.get_weights()
+    del audio_model
+    print ('cleanup audio model from before.')
+except:
+    print ('no audio model from before.')
+
+model_name='audio_v20_named_rn_testing'
 audio_model = Sequential()
 
 # Detect speech component in waveforms.
@@ -175,15 +182,13 @@ modelweights_filepath=savedmodel_path+'weights.best_'+model_name+'.hdf5'
 ###audio_model.fit(data_train_scramble, label_train_scramble, 
 ###          validation_data=(data_valid_reshape, label_valid),
 ###          epochs=1, batch_size=20, callbacks=[checkpointer], shuffle=False, verbose=0)
+shuffle_val=True
 
 audio_model.fit(data_train_scramble, label_train_scramble, 
           validation_data=(data_valid_reshape, label_valid),
-          epochs=20, batch_size=20, shuffle=False, verbose=1)
+          epochs=20, batch_size=20, shuffle=shuffle_val, verbose=1)
 
 
-#
-# Save full_model
-#
 ###audio_model.save(savedmodel_path+'config_'+model_name+'.hdf5')
 # make sure we got a good saved model.
 ###del audio_model 
@@ -201,7 +206,14 @@ print('Test accuracy: %.4f%%' % test_accuracy)
 
 #dump out weights
 print('audio_model.get_weights()[0][0] = ', audio_model.get_weights()[0][0])
-del audio_model
+print()
+print('shuffle above = ', shuffle_val)
+print('====')
+#
+# Save full_model
+#
+audio_model.save(savedmodel_path+'config_'+model_name+'.hdf5')
+###del audio_model
 
 #
 # Check random state at end of processing
