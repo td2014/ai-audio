@@ -7,6 +7,22 @@ Code to create some diagnotics of the learning process.
 
 @author: anthonydaniell
 """
+import numpy as np
+import tensorflow as tf
+import random as rn
+np.random.seed(42)
+rn.seed(12345)
+#single thread
+session_conf = tf.ConfigProto(
+      intra_op_parallelism_threads=1,
+      inter_op_parallelism_threads=1)
+
+from keras import backend as K
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
+
+#
 from keras.layers import Conv1D
 from keras.layers import Dropout, Flatten, Dense
 from keras.layers import GlobalAveragePooling1D, MaxPooling1D, AveragePooling1D
@@ -98,15 +114,15 @@ pf.close()
 #
 data_len_max = data_train.shape[2] # Common max length
 
-np.random.seed(42)
+###np.random.seed(42)
 
 #
 # Scramble the training data (it is all USA then all OTHER in the file)
 #
 
-perm = np.random.permutation(len(data_train))
-data_train_scramble = np.reshape(data_train[perm],(-1,data_len_max,1))
-label_train_scramble = label_train[perm]
+perm_diag = np.random.permutation(len(data_train))
+data_train_scramble = np.reshape(data_train[perm_diag],(-1,data_len_max,1))
+label_train_scramble = label_train[perm_diag]
 
 data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
 data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
@@ -117,14 +133,14 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 #
 
 # Load weights from previous training session
-audio_model = load_model('saved_models/config_audio_v9_named.hdf5')
+audio_model_diag = load_model('saved_models/config_audio_v21_named.hdf5')
 
 # get index of predicted accent for each image in test set
-audio_predictions = [np.argmax(audio_model.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
+audio_predictions_diag = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 
 # report test accuracy
-test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, axis=1))/len(audio_predictions)
-print('Test accuracy: %.4f%%' % test_accuracy)
+test_accuracy_diag = 100*np.sum(np.array(audio_predictions_diag)==np.argmax(label_test, axis=1))/len(audio_predictions_diag)
+print('Test accuracy: %.4f%%' % test_accuracy_diag)
 
 #
 # Compute some diagnostics
@@ -137,11 +153,11 @@ print('Test accuracy: %.4f%%' % test_accuracy)
 # new model
 ###fname = 'saved_models/weights.best_audio_v4_named.hdf5'
 model = Sequential()
-model.add(audio_model.layers[0])  # will be loaded
+model.add(audio_model_diag.layers[0])  # will be loaded
 ###model.add(audio_model.layers[1])  # will be loaded
 model.summary()
 ###model.load_weights(fname, by_name=True)
-model_prediction = model.predict(data_train_scramble)
+model_prediction_diag = model.predict(data_train_scramble)
 
 #
 # Create an image which shows output after the maxpooling layer

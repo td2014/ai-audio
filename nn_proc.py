@@ -151,7 +151,7 @@ try:
 except:
     print ('no audio model from before.')
 
-model_name='audio_v20_named_rn_testing'
+model_name='audio_v24_named'
 audio_model = Sequential()
 
 # Detect speech component in waveforms.
@@ -205,14 +205,22 @@ test_accuracy = 100*np.sum(np.array(audio_predictions)==np.argmax(label_test, ax
 print('Test accuracy: %.4f%%' % test_accuracy)
 
 #dump out weights
-print('audio_model.get_weights()[0][0] = ', audio_model.get_weights()[0][0])
+
 print()
 print('shuffle above = ', shuffle_val)
+print('audio_model.get_weights()[0][0] = ', audio_model.get_weights()[0][0])
+print()
+
+#
+# Save full model
+#
+full_model_savename = savedmodel_path+'config_'+model_name+'.hdf5'
+audio_model.save(full_model_savename)
+
+print('model = ',model_name)
+print('model file = ', full_model_savename)
 print('====')
-#
-# Save full_model
-#
-audio_model.save(savedmodel_path+'config_'+model_name+'.hdf5')
+
 ###del audio_model
 
 #
