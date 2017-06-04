@@ -127,20 +127,34 @@ label_train_scramble = label_train[perm_diag]
 data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
 data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 
+# for testing/development
+subset_min=0
+subset_max=6
+subset_time_min=0
+subset_time_max=data_len_max#=10000
+data_train_scramble_subset=data_train_scramble[subset_min:subset_max,subset_time_min:subset_time_max,:]
+label_train_scramble_subset=label_train_scramble[subset_min:subset_max,:]
+
 #
 # Load weights file and recreate earlier processing stages
 # Overlay with data timeseries.
 #
 
 # Load weights from previous training session
-audio_model_diag = load_model('saved_models/config_audio_v21_named.hdf5')
+audio_model_diag = load_model('saved_models/config_audio_v35_named.hdf5')
 
 # get index of predicted accent for each image in test set
-audio_predictions_diag = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
-
+###audio_predictions_diag_test = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
 # report test accuracy
-test_accuracy_diag = 100*np.sum(np.array(audio_predictions_diag)==np.argmax(label_test, axis=1))/len(audio_predictions_diag)
-print('Test accuracy: %.4f%%' % test_accuracy_diag)
+###accuracy_diag_test = 100*np.sum(np.array(audio_predictions_diag_test)==np.argmax(label_test, axis=1))/len(audio_predictions_diag_test)
+###print('Test accuracy (diag): %.4f%%' % accuracy_diag_test)
+
+# Report train accuracy
+# get index of predicted accent for each image in test set
+audio_predictions_diag_train = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_train_scramble_subset]
+# report test accuracy
+accuracy_diag_train = 100*np.sum(np.array(audio_predictions_diag_train)==np.argmax(label_train_scramble_subset, axis=1))/len(audio_predictions_diag_train)
+print('Train accuracy (diag): %.4f%%' % accuracy_diag_train)
 
 #
 # Compute some diagnostics
@@ -153,11 +167,10 @@ print('Test accuracy: %.4f%%' % test_accuracy_diag)
 # new model
 ###fname = 'saved_models/weights.best_audio_v4_named.hdf5'
 model = Sequential()
-model.add(audio_model_diag.layers[0])  # will be loaded
+model.add(audio_model_diag.layers[0])  # layer 0 will be loaded from original model
 ###model.add(audio_model.layers[1])  # will be loaded
 model.summary()
-###model.load_weights(fname, by_name=True)
-model_prediction_diag = model.predict(data_train_scramble)
+model_prediction_diag = model.predict(data_train_scramble_subset)
 
 #
 # Create an image which shows output after the maxpooling layer
@@ -174,36 +187,31 @@ model_prediction_diag = model.predict(data_train_scramble)
 #  ~~~~~~waveform~~~~~~~~~~~~~~
 #
 #
-##img_idx=9
-#plt.imshow(np.rot90(model_prediction[0,:,:],1),cmap='hot')
-#plt.plot(data_train_scramble[0,:,:])
-#dsamp = sig.decimate(data_train_scramble[0,:100000,:],10)
-###diag_weights = audio_model.get_weights(by_name=True)
-#diag_config = audio_model.get_config()[0]['config']
-###config_name= diag_config['name']
 
-fig, ax = plt.subplots()
-idx=1
-istart1=2600
-iend1=4000
-istart2=1000
-iend2=2000
-ax.plot(4000*data_train_scramble[0,istart1:iend1,:],alpha=1.0)
-ax.plot(4000*data_train_scramble[1,istart2:iend2,:],alpha=0.5)
-#ax.imshow(np.rot90(model_prediction[idx,istart:iend,:],1),cmap='hot',extent=[0, iend-istart, -2000, 2000],alpha=1.0)
-###fig.canvas.draw()
+fig = plt.figure(figsize=(8, 4))
+ax = fig.add_subplot(111)
+plt.tight_layout()
 
-##fig, ax = plt.subplots()
-##x = range(300)
-##ax.imshow(np.rot90(model_prediction[0,istart:iend,:],1),cmap='hot', extent=[0, 400, 0, 300])
-##ax.plot(x, x, '--', linewidth=5, color='firebrick')
+# extract the desired image
+img_idx=5
+istart=0
+iend=10000
+#ax.plot(4000*data_train_scramble[0,istart1:iend1,:],alpha=1.0)
+img = ax.imshow(np.rot90(model_prediction_diag[img_idx,istart:iend,:],1),
+                   cmap='hot', extent=[istart, iend,
+                                       0, model_prediction_diag.shape[2]],
+                   alpha=1.0)
+ax.set_aspect('auto')
+plt.colorbar(img)
+# Create line plot
+center_plot=model_prediction_diag.shape[2]/2 # center line plot on number of filters/2
+scale=center_plot*1.0 # adjust scaling to stretch to max range 
+ax.plot(scale*data_train_scramble_subset[img_idx,istart:iend,:]+center_plot,alpha=0.4)
+# plot weights
+conv1D_weights = model.get_weights()[0]
+###weight_scale=scale
+###ax.plot(scale*data_train_scramble_subset[img_idx,istart:iend,:]+center_plot,alpha=0.4)
 
-
-###for iCase in range(len(model_prediction)):
-###    if label_train_scramble[iCase,1] == 1:  #USA class
-###        plt.plot(model_prediction[iCase,:])
-
-###conv1D_weights = audio_model.get_weights()[0]
 #
 # End of script
 #

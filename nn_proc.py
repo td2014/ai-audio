@@ -74,7 +74,7 @@ savedmodel_path= \
 #
 # Load pickle files
 #
-subset_len=1000000 # reduce full data fields
+subset_len=100000 # reduce full data fields
 downsample_factor=10
 pf=open(data_train_pickle, 'rb')
 data_train_full = np.load(pf)
@@ -133,6 +133,14 @@ label_train_scramble = label_train[perm]
 data_valid_reshape = np.reshape(data_valid,(-1,data_len_max,1))
 data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 
+# for testing/development
+subset_min=0
+subset_max=data_train.shape[0]  # 6 for diagnostic deep dive
+subset_time_min=0
+subset_time_max=data_len_max #=10000
+data_train_scramble_subset=data_train_scramble[subset_min:subset_max,subset_time_min:subset_time_max,:]
+label_train_scramble_subset=label_train_scramble[subset_min:subset_max,:]
+
 #
 # The architecture should be
 #
@@ -151,11 +159,11 @@ try:
 except:
     print ('no audio model from before.')
 
-model_name='audio_v24_named'
+model_name='audio_v36_named'
 audio_model = Sequential()
 
 # Detect speech component in waveforms.
-audio_model.add(Conv1D(64, kernel_size=512, strides=16, activation='relu', 
+audio_model.add(Conv1D(4, kernel_size=1024, strides=1, activation='relu', 
                        input_shape=(data_len_max,1), name='conv_1'))
 
 # Collapse down to number of characters (should be based on time of snippet)
@@ -182,11 +190,17 @@ modelweights_filepath=savedmodel_path+'weights.best_'+model_name+'.hdf5'
 ###audio_model.fit(data_train_scramble, label_train_scramble, 
 ###          validation_data=(data_valid_reshape, label_valid),
 ###          epochs=1, batch_size=20, callbacks=[checkpointer], shuffle=False, verbose=0)
-shuffle_val=True
+shuffle_val=False
 
-audio_model.fit(data_train_scramble, label_train_scramble, 
-          validation_data=(data_valid_reshape, label_valid),
-          epochs=20, batch_size=20, shuffle=shuffle_val, verbose=1)
+###audio_model.fit(data_train_scramble, label_train_scramble, 
+###          validation_data=(data_valid_reshape, label_valid),
+###          epochs=20, batch_size=20, shuffle=shuffle_val, verbose=1)
+
+# subset testing
+audio_model.fit(data_train_scramble_subset, 
+                label_train_scramble_subset, 
+                epochs=20, batch_size=subset_max-subset_min, 
+                shuffle=shuffle_val, verbose=1)
 
 
 ###audio_model.save(savedmodel_path+'config_'+model_name+'.hdf5')
