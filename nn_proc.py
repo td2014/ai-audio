@@ -159,7 +159,7 @@ try:
 except:
     print ('no audio model from before.')
 
-model_name='audio_v36_named'
+model_name='audio_v37_named'
 audio_model = Sequential()
 
 # Detect speech component in waveforms.
@@ -170,7 +170,7 @@ audio_model.add(Conv1D(4, kernel_size=1024, strides=1, activation='relu',
 
 audio_model.add(GlobalMaxPooling1D(name='maxpool_1')) #100 time samples per letter
 # Include a two layer multilayer perceptron for the classifier backend
-audio_model.add(Dense(256, activation='relu', name='dense_1'))
+audio_model.add(Dense(16, activation='relu', name='dense_1'))
 audio_model.add(Dropout(0.5, name='dropout_1'))
 
 # We want probabilities over the accent classes (2 for now)
