@@ -140,11 +140,11 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 
 # for testing/development
 subset_min=0
-subset_max=6 #data_train.shape[0]  # 6 for diagnostic deep dive
+subset_max=data_train.shape[0]  # 6 for diagnostic deep dive
 subset_time_min=0
 subset_time_max=data_len_max #=10000
 data_train_scramble_subset=data_train_scramble[subset_min:subset_max,subset_time_min:subset_time_max,:]
-label_train_scramble_subset=label_train_scramble[subset_min:subset_max,:]*10000
+label_train_scramble_subset=label_train_scramble[subset_min:subset_max,:]
 
 #
 # The architecture should be
@@ -168,43 +168,36 @@ model_name='audio_v43_named'
 audio_model = Sequential()
 
 # Detect speech component in waveforms.
-###audio_model.add(Conv1D(6, kernel_size=10000, strides=1, activation='relu', 
-###                       input_shape=(data_len_max,1), name='conv_1', 
-###                       use_bias=False))
-
-audio_model.add(Conv1D(6, kernel_size=10000, strides=1, 
-                       input_shape=(data_len_max,1), name='conv_1', 
-                       use_bias=False))
+audio_model.add(Conv1D(4, kernel_size=1024, strides=1, activation='relu', 
+                       input_shape=(data_len_max,1), name='conv_1'))
 
 # Collapse down to number of characters (should be based on time of snippet)
 
 audio_model.add(GlobalMaxPooling1D(name='maxpool_1')) #100 time samples per letter
 # Include a two layer multilayer perceptron for the classifier backend
-###audio_model.add(Dense(16, activation='relu', name='dense_1'))
-###audio_model.add(Dropout(0.5, name='dropout_1'))
+audio_model.add(Dense(16, activation='relu', name='dense_1'))
+audio_model.add(Dropout(0.5, name='dropout_1'))
 
 # We want probabilities over the accent classes (2 for now)
-###audio_model.add(Dense(2,activation='softmax', name='dense_3'))  # Baseline
+audio_model.add(Dense(2,activation='softmax', name='dense_3'))  # Baseline
 # for testing - force the input filters to exactly replicate the input signals
-def my_init(shape, dtype=None):
-    init_weights = np.zeros([6,2],dtype=dtype)
-    init_weights[0,1] = 1
-    init_weights[1,1] = 1
-    init_weights[2,1] = 1
-    init_weights[3,0] = 1
-    init_weights[4,0] = 1
-    init_weights[5,0] = 1
-    return init_weights
+###def my_init(shape, dtype=None):
+###    init_weights = np.zeros([6,2],dtype=dtype)
+###    init_weights[0,1] = 1
+###    init_weights[1,1] = 1
+###    init_weights[2,1] = 1
+###    init_weights[3,0] = 1
+###    init_weights[4,0] = 1
+###    init_weights[5,0] = 1
+###    return init_weights
 
-audio_model.add(Dense_FreezeKernel(2,activation='linear', name='dense_3', 
-                      kernel_initializer=my_init,
-                      use_bias=False))
+###audio_model.add(Dense_FreezeKernel(2,activation='linear', name='dense_3', 
+###                      kernel_initializer=my_init,
+###                      use_bias=False))
 
 # Output architecture and compile
 audio_model.summary()
-###audio_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-###audio_model.compile(loss='categorical_crossentropy', optimizer='adagrad', metrics=['accuracy'])
-audio_model.compile(loss='mse', optimizer='adagrad', metrics=['accuracy'])
+audio_model.compile(loss='categorical_crossentropy', optimizer='adagrad', metrics=['accuracy'])
 #
 # Compute Cross-Validation Accuracy
 #
@@ -222,14 +215,9 @@ shuffle_val=False
 ###          epochs=20, batch_size=20, shuffle=shuffle_val, verbose=1)
 
 # subset testing
-#audio_model.fit(data_train_scramble_subset, 
-#                label_train_scramble_subset, 
-#                epochs=10, batch_size=subset_max-subset_min, 
-#                shuffle=shuffle_val, verbose=1)
-
 audio_model.fit(data_train_scramble_subset, 
                 label_train_scramble_subset, 
-                epochs=10, batch_size=1, 
+                epochs=20, batch_size=subset_max-subset_min, 
                 shuffle=shuffle_val, verbose=1)
 
 
@@ -264,8 +252,6 @@ full_model_savename = savedmodel_path+'config_'+model_name+'.hdf5'
 print('model = ',model_name)
 print('model file = ', full_model_savename)
 print('====')
-
-###del audio_model
 
 #
 # Check random state at end of processing
