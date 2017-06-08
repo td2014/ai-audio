@@ -10,6 +10,8 @@ Code to create some diagnotics of the learning process.
 import numpy as np
 import tensorflow as tf
 import random as rn
+import os
+os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(42)
 rn.seed(12345)
 #single thread
@@ -38,6 +40,8 @@ import soundfile as sf
 import matplotlib.pyplot as plt
 import pickle
 import sounddevice as sd
+#
+from custom_layers import Dense_FreezeKernel
 
 #
 # Read in and preprocess data similar to what is done for the
@@ -66,7 +70,7 @@ file_test_pickle=outputDir_pickle_files+'file_test_pickle.out'
 #
 # Load pickle files
 #
-subset_len=1000000 # reduce full data fields
+subset_len=100000 # reduce full data fields
 downsample_factor=10
 pf=open(data_train_pickle, 'rb')
 data_train_full = np.load(pf)
@@ -129,7 +133,7 @@ data_test_reshape = np.reshape(data_test,(-1,data_len_max,1))
 
 # for testing/development
 subset_min=0
-subset_max=6
+subset_max=6 #data_train.shape[0]  # 6 for diagnostic deep dive
 subset_time_min=0
 subset_time_max=data_len_max#=10000
 data_train_scramble_subset=data_train_scramble[subset_min:subset_max,subset_time_min:subset_time_max,:]
@@ -141,7 +145,7 @@ label_train_scramble_subset=label_train_scramble[subset_min:subset_max,:]
 #
 
 # Load weights from previous training session
-audio_model_diag = load_model('saved_models/config_audio_v35_named.hdf5')
+audio_model_diag = load_model('saved_models/config_audio_v40_named.hdf5')
 
 # get index of predicted accent for each image in test set
 ###audio_predictions_diag_test = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_test_reshape]
@@ -151,10 +155,10 @@ audio_model_diag = load_model('saved_models/config_audio_v35_named.hdf5')
 
 # Report train accuracy
 # get index of predicted accent for each image in test set
-audio_predictions_diag_train = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_train_scramble_subset]
+###audio_predictions_diag_train = [np.argmax(audio_model_diag.predict(np.expand_dims(feature, axis=0))) for feature in data_train_scramble_subset]
 # report test accuracy
-accuracy_diag_train = 100*np.sum(np.array(audio_predictions_diag_train)==np.argmax(label_train_scramble_subset, axis=1))/len(audio_predictions_diag_train)
-print('Train accuracy (diag): %.4f%%' % accuracy_diag_train)
+###accuracy_diag_train = 100*np.sum(np.array(audio_predictions_diag_train)==np.argmax(label_train_scramble_subset, axis=1))/len(audio_predictions_diag_train)
+###print('Train accuracy (diag): %.4f%%' % accuracy_diag_train)
 
 #
 # Compute some diagnostics
@@ -188,19 +192,24 @@ model_prediction_diag = model.predict(data_train_scramble_subset)
 #
 #
 
-fig = plt.figure(figsize=(8, 4))
+fig = plt.figure(figsize=(8, 3))
 ax = fig.add_subplot(111)
 plt.tight_layout()
 
 # extract the desired image
-img_idx=5
+img_idx=0
 istart=0
 iend=10000
 #ax.plot(4000*data_train_scramble[0,istart1:iend1,:],alpha=1.0)
+###img = ax.imshow(np.rot90(model_prediction_diag[img_idx,istart:iend,:],1),
+###                   cmap='hot', extent=[istart, iend,
+###                                       0, model_prediction_diag.shape[2]],
+###                   alpha=1.0)
+
 img = ax.imshow(np.rot90(model_prediction_diag[img_idx,istart:iend,:],1),
-                   cmap='hot', extent=[istart, iend,
-                                       0, model_prediction_diag.shape[2]],
+                   cmap='hot',
                    alpha=1.0)
+
 ax.set_aspect('auto')
 plt.colorbar(img)
 # Create line plot
@@ -212,6 +221,10 @@ conv1D_weights = model.get_weights()[0]
 ###weight_scale=scale
 ###ax.plot(scale*data_train_scramble_subset[img_idx,istart:iend,:]+center_plot,alpha=0.4)
 
+# Create a concatenated array of all the training samples:
+flat_train = np.ndarray.flatten(data_train_scramble)
+# Create a concatenated array of all the test samples:
+flat_test = np.ndarray.flatten(data_test_reshape)
 #
 # End of script
 #
